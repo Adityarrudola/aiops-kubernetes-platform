@@ -3,6 +3,8 @@ kind: PersistentVolumeClaim
 metadata:
   name: logs-pvc
 spec:
+  volumeName: logs-pv         
+  storageClassName: ""     
   accessModes:
     - ReadWriteOnce
   resources:
