@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.service.port }}
+
+          env:
+            - name: MONGO_URI
+              value: "{{ .Values.env.MONGO_URI }}"
+
+          volumeMounts:
+            - name: log-volume
+              mountPath: /var/log/app
+
+        - name: filebeat
+          image: docker.elastic.co/beats/filebeat:8.12.0
+          args: ["-c", "/etc/filebeat.yml", "-e"]
+
+          volumeMounts:
+            - name: log-volume
+              mountPath: /var/log/app
+
+            - name: filebeat-config
+              mountPath: /etc/filebeat.yml
+              subPath: filebeat.yml
+
+      volumes:
+        - name: log-volume
+          persistentVolumeClaim:
+            claimName: logs-pvc
+
+        - name: filebeat-config
+          configMap:
+            name: filebeat-config

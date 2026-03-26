@@ -1,0 +1,13 @@
+replicaCount: 1
+
+image:
+  repository: notes-frontend
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 80
+
+env:
+  REACT_APP_API_URL: "http://backend-service:5001"
